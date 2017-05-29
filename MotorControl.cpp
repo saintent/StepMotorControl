@@ -24,7 +24,6 @@
 // ---------- PUBLIC DATA ----------------------------------------------------------------------- //
 // N/A
 // ---------- PRIVATE METHOD (FUNCTION PROTOTYPE) ----------------------------------------------- //
-static unsigned long sqrt(unsigned long x);
 //unsigned int min(unsigned int x, unsigned int y);
 // ---------- PRIVATE DATA ---------------------------------------------------------------------- //
 #ifndef MOTION_IMPLEMENT_ISR
@@ -50,14 +49,6 @@ void MotorControl::begin() {
 }
 
 void MotorControl::Init() {
-	this->accelCount = 0;
-	this->decelStart = 0;
-	this->decelVal = 0;
-	this->minDelay = 0;
-	this->runState = SPS_Stop;
-	this->stepDelay = 0;
-	this->stepPosition = 0;
-
 	// Timer/Counter 1 in mode 4 CTC (Not running).
 	// Timer/Counter 1 Output Compare A Match Interrupt enable.
 	cli();
@@ -72,6 +63,7 @@ void MotorControl::Init() {
 
 void MotorControl::Move(int32_t step, uint32_t accel, uint32_t decel,
 		uint32_t speed) {
+
 	//! Number of steps before we hit max speed.
 	unsigned int max_s_lim;
 	//! Number of steps before we must start deceleration (if accel does not hit max speed).
@@ -156,17 +148,17 @@ void MotorControl::Move(int32_t step, uint32_t accel, uint32_t decel,
 		// Reset counter.
 		this->accelCount = 0;
 
-		Serial.println("runState : " + String(runState));
-		Serial.println("direction : " + String(direction));
-		Serial.println("stepPosition : " + String(stepPosition));
-		Serial.println("stepDelay : " + String(stepDelay));
-		Serial.println("decelStart : " + String(decelStart));
-		Serial.println("decelVal : " + String(decelVal));
-		Serial.println("minDelay : " + String(minDelay));
-		Serial.println("accelCount : " + String(accelCount));
-		Serial.println("lastAccelDelay : " + String(lastAccelDelay));
-		Serial.println("stepCount : " + String(stepCount));
-		Serial.println("rest : " + String(rest));
+//		Serial.println("runState : " + String(runState));
+//		Serial.println("direction : " + String(direction));
+//		Serial.println("stepPosition : " + String(stepPosition));
+//		Serial.println("stepDelay : " + String(stepDelay));
+//		Serial.println("decelStart : " + String(decelStart));
+//		Serial.println("decelVal : " + String(decelVal));
+//		Serial.println("minDelay : " + String(minDelay));
+//		Serial.println("accelCount : " + String(accelCount));
+//		Serial.println("lastAccelDelay : " + String(lastAccelDelay));
+//		Serial.println("stepCount : " + String(stepCount));
+//		Serial.println("rest : " + String(rest));
 
 		OCR1A = this->stepDelay;
 		OCR1B = this->stepDelay / 2;
@@ -187,18 +179,6 @@ void MotorControl::Move(int32_t step, uint32_t accel, uint32_t decel,
 
 void MotorControl::Callback(MotorControl* obj) {
 	obj->Process();
-	/*Serial.print("runState : " + String(obj->runState));
-	 //Serial.println("direction : " + String(obj->direction));
-	 //Serial.println("stepPosition : " + String(obj->stepPosition));
-	 Serial.print("\tstepDelay : " + String(obj->stepDelay));
-	 //Serial.println("decelStart : " + String(obj->decelStart));
-	 //Serial.println("decelVal : " + String(obj->decelVal));
-	 //Serial.println("minDelay : " + String(obj->minDelay));
-	 Serial.print("\taccelCount : " + String(obj->accelCount));
-	 Serial.print("\tlastAccelDelay : " + String(obj->lastAccelDelay));
-	 Serial.print("\tstepCount : " + String(obj->stepCount));
-	 Serial.println("\trest : " + String(obj->rest));*/
-	//Serial.println(obj->stepCount);
 }
 
 } /* end of namespace MOTOR */
