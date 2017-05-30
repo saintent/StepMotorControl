@@ -7,9 +7,15 @@
 
 // ---------- SYSTEM INCLUDE --------------------------------------------------------------------- //
 #include "stdint.h"
-#include "arm_math.h"
+//#include "arm_math.h"
 #include "Motor.h"
-#include "IPWM.h"
+#if ARDUINO >= 100
+ #include "Arduino.h"
+#else
+ #include "WProgram.h"
+ #include "stdlib.h"
+ #include "wiring.h"
+#endif
 // ---------- EXTERNAL MODULE INCLUDE ------------------------------------------------------------ //
 // N/A
 // ---------- PUBLIC PROGRAMMING DEFINE ---------------------------------------------------------- //
@@ -41,7 +47,7 @@ public:
 		STOP,
 		ACC,
 		RUN,
-		DEC,
+		DECCEL,
 		SPIN
 	} MotorState_t;
 
@@ -96,7 +102,7 @@ private:
 } /* namespace Motor */
 
 #ifndef MOTION_IMPLEMENT_ISR
-extern MOTOR::MotorControl motionControl;
+extern Motor::StepMotor stepMotor;
 #endif
 
 // ---------- END OF CLASS DECLARATION ---------------------------------------------------------- //

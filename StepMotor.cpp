@@ -3,7 +3,6 @@
  */
 
 // ---------- SYSTEM INCLUDE --------------------------------------------------------------------- //
-#include "arm_math.h"
 #include "StepMotor.h"
 // ---------- EXTERNAL MODULE INCLUDE ------------------------------------------------------------ //
 // N/A
@@ -23,7 +22,7 @@ void TimerStop();
 void UpdateTimer(uint16_t value);
 // ---------- PRIVATE DATA ---------------------------------------------------------------------- //
 #ifndef MOTION_IMPLEMENT_ISR
-MOTOR::StepMotor motionControl;
+Motor::StepMotor stepMotor;
 #endif
 // ---------- PRIVATE PROGRAMMING DEFINE -------------------------------------------------------- //
 // N/A
@@ -93,6 +92,9 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	// Setup PWM and start
 	//timer->UpdateFrequency(frq);
 	UpdateTimer((uint16_t)this->c0);
+	// Calculate next cn
+	++this->n;
+	this->cn = this->calCn(this->n);
 
 	return this->currentStep;
 
@@ -102,6 +104,9 @@ uint8_t StepMotor::Run(void) {
 	uint32_t frq;
 	int32_t _n;
 
+	//	timer->UpdateFrequency(frq);
+	UpdateTimer((uint16_t)this->cn);
+
 	switch (this->state) {
 	case STOP:
 		// Do nothing
@@ -110,7 +115,7 @@ uint8_t StepMotor::Run(void) {
 		_n = ++this->n;
 		this->cn = this->calCn(_n);
 		if (_n >= this->stepToDec) {
-			this->state = DEC;
+			this->state = DECCEL;
 		}
 		else if (_n >= this->stepToSpeed) {
 			if (this->move == MOVE_SPIN) {
@@ -126,11 +131,11 @@ uint8_t StepMotor::Run(void) {
 
 		// Go to Deceleration state.
 		if (_n >= this->stepToDec) {
-			this->state = DEC;
+			this->state = DECCEL;
 			this->n = -this->stepToStop;
 		}
 		break;
-	case DEC:
+	case DECCEL:
 		_n = ++this->n;
 		this->cn = this->calCn(_n);
 
@@ -154,9 +159,9 @@ uint8_t StepMotor::Run(void) {
 //=========== Private Method ======================================================================//
 uint32_t StepMotor::calMinDelay(void) {
 	uint32_t cMin;
-	float32_t cMinf;
+	float cMinf;
 
-	cMinf = STEP_ANGLE*TIMER_FREQ / this->rMaxSpeed;
+	cMinf = STEP_ANGLE*TIMER_FREQ / this->maxSpeed;
 
 	cMin = (uint32_t)cMinf;
 
@@ -166,9 +171,9 @@ uint32_t StepMotor::calMinDelay(void) {
 
 uint32_t StepMotor::calC0(void) {
 	uint32_t _c0;
-	float32_t c0f;
+	float c0f;
 
-	c0f = 0.676*TIMER_FREQ*sqrtf((2*STEP_ANGLE)/this->rAcc);
+	c0f = 0.676*TIMER_FREQ*sqrtf((2*STEP_ANGLE)/this->acc);
 
 	_c0 = (uint32_t)_c0;
 
@@ -177,7 +182,7 @@ uint32_t StepMotor::calC0(void) {
 
 uint32_t StepMotor::calCn(int32_t n) {
 	uint32_t _cn;
-	float32_t cnf;
+	float cnf;
 
 	cnf = this->cn - (2 * this->cn) / ((4 * n) + 1);
 
@@ -187,7 +192,7 @@ uint32_t StepMotor::calCn(int32_t n) {
 }
 
 uint32_t StepMotor::calSpeed(uint32_t c) {
-	float32_t spd;
+	float spd;
 
 	spd = (STEP_ANGLE * this->fref) / c;
 
@@ -195,25 +200,25 @@ uint32_t StepMotor::calSpeed(uint32_t c) {
 }
 
 uint32_t StepMotor::calStepToSpeed(void) {
-	float32_t _n;
+	float _n;
 
-	_n = (this->rSpeed * this->rSpeed) / (2 * PI * this->rAcc);
+	_n = (this->speed * this->speed) / (2 * PI * this->acc);
 
 	return (uint32_t) _n;
 }
 
 uint32_t StepMotor::calAccLimit(uint32_t step) {
-	float32_t _n;
+	float _n;
 
-	_n = (step * this->rDec) / (this->rAcc + this->rDec);
+	_n = (step * this->dec) / (this->acc + this->dec);
 
 	return (uint32_t) _n;
 }
 
 uint32_t StepMotor::calStepToStop(void) {
-	float32_t _n;
+	float _n;
 
-	_n = (this->rSpeed * this->rSpeed) / (2 * PI * this->rDec);
+	_n = (this->speed * this->speed) / (2 * PI * this->dec);
 
 	return (uint32_t) _n;
 }
@@ -237,7 +242,7 @@ ISR (TIMER1_OVF_vect) {
 	//PORTD ^= 1 << 6;
 	PORTD ^= 1 << 7;
 	//MOTOR::MotorControl::Callback (&motionControl);
-	motionControl.Run();
+	stepMotor.Run();
 
 }
 

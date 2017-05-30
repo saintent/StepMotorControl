@@ -7,7 +7,6 @@
 
 // ---------- SYSTEM INCLUDE --------------------------------------------------------------------- //
 #include "stdint.h"
-#include "arm_math.h"
 // ---------- EXTERNAL MODULE INCLUDE ------------------------------------------------------------ //
 // N/A
 // ---------- PUBLIC PROGRAMMING DEFINE ---------------------------------------------------------- //
@@ -38,23 +37,23 @@ public:
 	/**	\brief Set speed motor
 	 *  \param[in] speed Speed in rpm.
 	 */
-	void 		Setspeed(float32_t speed);
+	void 		Setspeed(float speed);
 	/** \brief Get motor speed
 	 *  \return Motor speed in rpm.
 	 */
-	float32_t 	GetSpeed(void);
+	float 	GetSpeed(void);
 
-	void 		SetAccelerator(float32_t acc);
-	float32_t	GetAccelerator(void);
+	void 		SetAccelerator(float acc);
+	float	GetAccelerator(void);
 
-	void		SetDeccelerator(float32_t dec);
-	float32_t	GetDeccelerator(void);
+	void		SetDeccelerator(float dec);
+	float	GetDeccelerator(void);
 
 protected:
-	float32_t speed;		//!< Current motor speed in radian.
-	float32_t maxSpeed;		//!< Max motor speed in radian.
-	float32_t acc;			//!< Motor acceleration in radian.
-	float32_t dec;			//!< Motor deceleration in radian.
+	float speed;		//!< Current motor speed in radian.
+	float maxSpeed;		//!< Max motor speed in radian.
+	float acc;			//!< Motor acceleration in radian.
+	float dec;			//!< Motor deceleration in radian.
 };
 
 } /* namespace Motor */
