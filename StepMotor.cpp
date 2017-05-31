@@ -75,6 +75,7 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	this->n = 0;
 	this->minDelay = this->calMinDelay();
 	this->c0 = this->calC0();
+	this->cn = this->c0;
 	//this->cn = this->calCn(this->n);
 	this->stepToSpeed = this->calStepToSpeed();
 	this->stepToStop = this->calStepToStop();
@@ -91,10 +92,18 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	//frq = (uint32_t) (this->c0 / this->fref);
 	// Setup PWM and start
 	//timer->UpdateFrequency(frq);
+	Serial.println("Start Move");
+	Serial.println("Min Delay : " + String(this->minDelay, DEC) );
+	Serial.println("stepToSpeed : " + String(this->stepToSpeed, DEC) );
+	Serial.println("stepToStop : " + String(this->stepToStop, DEC) );
+	Serial.println("stepToDec : " + String(this->stepToDec, DEC) );
+	Serial.println("C0 : " + String(this->c0, DEC) );
 	UpdateTimer((uint16_t)this->c0);
 	// Calculate next cn
 	++this->n;
 	this->cn = this->calCn(this->n);
+	Serial.println("Cn : " + String(this->cn, DEC) );
+	TimerStart();
 
 	return this->currentStep;
 
@@ -103,13 +112,15 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 uint8_t StepMotor::Run(void) {
 	uint32_t frq;
 	int32_t _n;
-
+	//Serial.println(String(this->n, DEC) +" : " + String(this->cn, DEC) );
 	//	timer->UpdateFrequency(frq);
 	UpdateTimer((uint16_t)this->cn);
 
 	switch (this->state) {
 	case STOP:
 		// Do nothing
+		Serial.println("Stop");
+		TimerStop();
 		break;
 	case ACC:
 		_n = ++this->n;
@@ -141,6 +152,7 @@ uint8_t StepMotor::Run(void) {
 
 		if (--this->stepToStop <= 0) {
 			// Goto stop
+
 			this->state = STOP;
 		}
 		break;
@@ -151,7 +163,7 @@ uint8_t StepMotor::Run(void) {
 
 //	frq = (uint32_t) (this->cn / this->fref);
 //	timer->UpdateFrequency(frq);
-	UpdateTimer((uint16_t)this->cn);
+	//UpdateTimer((uint16_t)this->cn);
 
 	return 1;
 
@@ -165,6 +177,7 @@ uint32_t StepMotor::calMinDelay(void) {
 
 	cMin = (uint32_t)cMinf;
 
+
 	return cMin;
 
 }
@@ -175,7 +188,7 @@ uint32_t StepMotor::calC0(void) {
 
 	c0f = 0.676*TIMER_FREQ*sqrtf((2*STEP_ANGLE)/this->acc);
 
-	_c0 = (uint32_t)_c0;
+	_c0 = (uint32_t)c0f;
 
 	return _c0;
 }
@@ -183,10 +196,17 @@ uint32_t StepMotor::calC0(void) {
 uint32_t StepMotor::calCn(int32_t n) {
 	uint32_t _cn;
 	float cnf;
-
-	cnf = this->cn - (2 * this->cn) / ((4 * n) + 1);
-
+	float x,y;
+	x = ((4 * n) + 1);
+	y = (2 * this->cn);
+	//Serial.println("cnf x: " + String(x, DEC) );
+	//Serial.println("cnf y: " + String(y, DEC) );
+	//Serial.println("cnf y/x: " + String(-(y/x), DEC) );
+	//cnf = (int32_t)this->cn - ((2 * this->cn) / ((4 * n) + 1));
+	cnf = (int32_t)this->cn - (y / x);
+	//Serial.println("cnf : " + String(cnf, DEC) );
 	_cn = (uint32_t)cnf;
+	//Serial.println( String(n, DEC) + " _cn : " + String(_cn, DEC) );
 
 	return _cn > this->minDelay ? _cn : this->minDelay;
 }
@@ -202,7 +222,7 @@ uint32_t StepMotor::calSpeed(uint32_t c) {
 uint32_t StepMotor::calStepToSpeed(void) {
 	float _n;
 
-	_n = (this->speed * this->speed) / (2 * PI * this->acc);
+	_n = (this->speed * this->speed) / (2 * STEP_ANGLE * this->acc);
 
 	return (uint32_t) _n;
 }
@@ -218,7 +238,7 @@ uint32_t StepMotor::calAccLimit(uint32_t step) {
 uint32_t StepMotor::calStepToStop(void) {
 	float _n;
 
-	_n = (this->speed * this->speed) / (2 * PI * this->dec);
+	_n = (this->speed * this->speed) / (2 * STEP_ANGLE * this->dec);
 
 	return (uint32_t) _n;
 }

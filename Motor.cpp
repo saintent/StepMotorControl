@@ -47,6 +47,7 @@ Motor::~Motor() {
 
 void Motor::Setspeed(float speed) {
 	this->speed = speed;
+	this->maxSpeed = speed;
 }
 
 float Motor::GetSpeed(void) {
