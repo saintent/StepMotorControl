@@ -92,17 +92,17 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	//frq = (uint32_t) (this->c0 / this->fref);
 	// Setup PWM and start
 	//timer->UpdateFrequency(frq);
-	Serial.println("Start Move");
-	Serial.println("Min Delay : " + String(this->minDelay, DEC) );
-	Serial.println("stepToSpeed : " + String(this->stepToSpeed, DEC) );
-	Serial.println("stepToStop : " + String(this->stepToStop, DEC) );
-	Serial.println("stepToDec : " + String(this->stepToDec, DEC) );
-	Serial.println("C0 : " + String(this->c0, DEC) );
+//	Serial.println("Start Move");
+//	Serial.println("Min Delay : " + String(this->minDelay, DEC) );
+//	Serial.println("stepToSpeed : " + String(this->stepToSpeed, DEC) );
+//	Serial.println("stepToStop : " + String(this->stepToStop, DEC) );
+//	Serial.println("stepToDec : " + String(this->stepToDec, DEC) );
+//	Serial.println("C0 : " + String(this->c0, DEC) );
 	UpdateTimer((uint16_t)this->c0);
 	// Calculate next cn
 	++this->n;
 	this->cn = this->calCn(this->n);
-	Serial.println("Cn : " + String(this->cn, DEC) );
+//	Serial.println("Cn : " + String(this->cn, DEC) );
 	TimerStart();
 
 	return this->currentStep;
@@ -116,10 +116,11 @@ uint8_t StepMotor::Run(void) {
 	//	timer->UpdateFrequency(frq);
 	UpdateTimer((uint16_t)this->cn);
 
+
 	switch (this->state) {
 	case STOP:
 		// Do nothing
-		Serial.println("Stop");
+		//Serial.println("Stop");
 		TimerStop();
 		break;
 	case ACC:
@@ -164,6 +165,12 @@ uint8_t StepMotor::Run(void) {
 //	frq = (uint32_t) (this->cn / this->fref);
 //	timer->UpdateFrequency(frq);
 	//UpdateTimer((uint16_t)this->cn);
+	if (this->dir) {
+		this->currentStep--;
+	}
+	else {
+		this->currentStep++;
+	}
 
 	return 1;
 
