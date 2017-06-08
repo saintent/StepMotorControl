@@ -76,6 +76,7 @@ public:
 	uint32_t MoveInc(uint32_t relative);
 	uint32_t Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t dec);
 	uint32_t Move(int32_t step);
+	uint8_t Stop();
 	uint8_t Run(void);
 	uint8_t IsMoving() {return this->isRunning;};
 

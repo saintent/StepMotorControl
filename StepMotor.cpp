@@ -130,7 +130,6 @@ uint32_t StepMotor::Move(int32_t step) {
 		return 0;
 	}
 
-
 	// Change state
 	this->state = StepMotor::ACC;
 //	Serial.println("Start Move");
@@ -152,10 +151,16 @@ uint32_t StepMotor::Move(int32_t step) {
 
 }
 
+uint8_t StepMotor::Stop() {
+	this->state = STOP;
+	this->isRunning = false;
+	TimerStop();
+}
+
 uint8_t StepMotor::Run(void) {
 	uint32_t frq;
 	int32_t _n;
-	//Serial.println(String(this->n, DEC) +" : " + String(this->cn, DEC) );
+	Serial.println(String(this->n, DEC) +" : " + String(this->cn, DEC) );
 	//	timer->UpdateFrequency(frq);
 	UpdateTimer((uint16_t)this->cn);
 
@@ -220,6 +225,12 @@ uint8_t StepMotor::Run(void) {
 	return 1;
 
 }
+
+uint32_t StepMotor::SetCurrentPosition(uint32_t value) {
+	this->Stop();
+	this->currentStep = value;
+}
+
 //=========== Private Method ======================================================================//
 uint32_t StepMotor::calMinDelay(void) {
 	uint32_t cMin;
