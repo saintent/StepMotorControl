@@ -41,7 +41,7 @@ StepMotor::~StepMotor() {
 }
 
 //=========== Public Method ======================================================================//
-uint8_t StepMotor::Init() {
+uint8_t StepMotor::Init(uint8_t dirPin, MotorDirLogic_t dirType) {
 	// Timer/Counter 1 in mode 4 CTC (Not running).
 	// Timer/Counter 1 Output Compare A Match Interrupt enable.
 	cli();
@@ -53,6 +53,23 @@ uint8_t StepMotor::Init() {
 	OCR1B = 0;
 	sei();
 	this->move = MOVE_POSITION;
+	this->dirPin = dirPin;
+	this->dirState = dirType;
+}
+
+uint32_t StepMotor::MoveAbs(uint32_t absolute) {
+	if (this->currentStep > absolute) {
+		this->Move(this->currentStep - absolute);
+	}
+	else {
+		this->Move(this->currentStep + absolute);
+	}
+	return 0;
+}
+
+uint32_t StepMotor::MoveInc(uint32_t relative) {
+	this->Move(this->currentStep);
+	return 0;
 }
 
 uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t dec) {

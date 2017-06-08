@@ -37,23 +37,23 @@ public:
 	/**	\brief Set speed motor
 	 *  \param[in] speed Speed in rpm.
 	 */
-	void 		Setspeed(float speed);
+	void 		Setspeed(uint32_t speed);
 	/** \brief Get motor speed
 	 *  \return Motor speed in rpm.
 	 */
-	float 	GetSpeed(void);
+	uint32_t 	GetSpeed(void);
 
-	void 		SetAccelerator(float acc);
-	float	GetAccelerator(void);
+	void 		SetAccelerator(uint32_t acc);
+	uint32_t	GetAccelerator(void);
 
-	void		SetDeccelerator(float dec);
-	float	GetDeccelerator(void);
+	void		SetDeccelerator(uint32_t dec);
+	uint32_t	GetDeccelerator(void);
 
 protected:
-	float speed;		//!< Current motor speed in radian.
-	float maxSpeed;		//!< Max motor speed in radian.
-	float acc;			//!< Motor acceleration in radian.
-	float dec;			//!< Motor deceleration in radian.
+	uint32_t speed;		//!< Current motor speed in radian.
+	uint32_t maxSpeed;		//!< Max motor speed in radian.
+	uint32_t acc;			//!< Motor acceleration in radian.
+	uint32_t dec;			//!< Motor deceleration in radian.
 };
 
 } /* namespace Motor */

@@ -61,13 +61,19 @@ public:
 		MOVE_POSITION
 	} MotorMoveMode_t;
 
+	typedef enum {
+		CW_LOW = 0,
+		CW_HIGH
+	} MotorDirLogic_t;
+
 	StepMotor();
 	virtual ~StepMotor();
 
-	uint8_t Init();
-
+	uint8_t Init(uint8_t dirPin, MotorDirLogic_t dirType);
+	uint32_t MoveAbs(uint32_t absolute);
+	uint32_t MoveInc(uint32_t relative);
 	uint32_t Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t dec);
-
+	uint32_t Move(int32_t step);
 	uint8_t Run(void);
 
 	uint32_t GetCurrentPosition() {return this->currentStep;};
@@ -84,6 +90,9 @@ private:
 
 
 private:
+	uint8_t			dirPin;
+	uint8_t			dirState;
+	uint8_t			isRunning;
 	MotorDir_t		dir;
 	MotorState_t	state;
 	MotorMoveMode_t	move;

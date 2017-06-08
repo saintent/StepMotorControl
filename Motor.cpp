@@ -45,28 +45,28 @@ Motor::~Motor() {
 	// TODO Auto-generated destructor stub
 }
 
-void Motor::Setspeed(float speed) {
+void Motor::Setspeed(uint32_t speed) {
 	this->speed = speed;
 	this->maxSpeed = speed;
 }
 
-float Motor::GetSpeed(void) {
+uint32_t Motor::GetSpeed(void) {
 	return this->speed;
 }
 
-void Motor::SetAccelerator(float acc) {
+void Motor::SetAccelerator(uint32_t acc) {
 	this->acc = acc;
 }
 
-float Motor::GetAccelerator(void) {
+uint32_t Motor::GetAccelerator(void) {
 	return this->acc;
 }
 
-void Motor::SetDeccelerator(float dec) {
+void Motor::SetDeccelerator(uint32_t dec) {
 	this->dec = dec;
 }
 
-float Motor::GetDeccelerator(void) {
+uint32_t Motor::GetDeccelerator(void) {
 	return this->dec;
 }
 //=========== Private Method ======================================================================//
