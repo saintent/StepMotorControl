@@ -81,6 +81,7 @@ public:
 	uint8_t IsMoving() {return this->isRunning;};
 
 	uint32_t GetCurrentPosition() {return this->currentStep;};
+	uint32_t SetCurrentPosition(uint32_t value);
 	uint8_t GetCurrentDir() {return (uint8_t)this->dir;};
 private:
 	uint32_t calMinDelay(void);
