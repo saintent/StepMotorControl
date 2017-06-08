@@ -51,25 +51,34 @@ uint8_t StepMotor::Init(uint8_t dirPin, MotorDirLogic_t dirType) {
 	TIMSK1 = (1 << TOIE1) | (1 << OCIE1B);
 	OCR1A = 0;
 	OCR1B = 0;
+
 	sei();
 	this->move = MOVE_POSITION;
 	this->dirPin = dirPin;
 	this->dirState = dirType;
+	this->isRunning = false;
+}
+
+uint8_t StepMotor::SetDirPin(uint8_t  dirPin) {
+	this->dirPin = dirPin;
+	return this->dirPin;
+}
+
+uint8_t StepMotor::SetDirLogic(MotorDirLogic_t dirType) {
+	this->dirState = dirType;
+	return this->dirState;
 }
 
 uint32_t StepMotor::MoveAbs(uint32_t absolute) {
-	if (this->currentStep > absolute) {
-		this->Move(this->currentStep - absolute);
-	}
-	else {
-		this->Move(this->currentStep + absolute);
-	}
-	return 0;
+//	Serial.println("Move abs");
+//	Serial.println("currentStep : " + String(this->currentStep, DEC) );
+//	Serial.println("absolute : " + String(absolute, DEC) );
+	return (this->Move(absolute - this->currentStep));
 }
 
 uint32_t StepMotor::MoveInc(uint32_t relative) {
-	this->Move(this->currentStep);
-	return 0;
+
+	return (this->Move(this->currentStep + relative));
 }
 
 uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t dec) {
@@ -81,8 +90,25 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	this->SetAccelerator(acc);
 	this->SetDeccelerator(dec);
 
+	return (this->Move(step));
+
+}
+
+uint32_t StepMotor::Move(int32_t step) {
+	int32_t distance;
+	if (this->isRunning) {
+		return 0;
+	}
 	this->targetStep += step;
 	this->dir = this->targetStep > this->currentStep ? DIR_CW : DIR_CCW;
+
+	// Write dir pin
+	if (this->dir == DIR_CW) {
+		digitalWrite(this->dirPin, this->dirState == CW_LOW ? LOW : HIGH);
+	}
+	else {
+		digitalWrite(this->dirPin, this->dirState == CW_LOW ? HIGH : LOW);
+	}
 
 	// get step to go
 	distance = this->targetStep - currentStep;
@@ -100,16 +126,15 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	if (this->stepToDec < 0) {
 		// error
 		// cann't perform
+//		Serial.println("can't Move");
 		return 0;
 	}
 
 
 	// Change state
 	this->state = StepMotor::ACC;
-	//frq = (uint32_t) (this->c0 / this->fref);
-	// Setup PWM and start
-	//timer->UpdateFrequency(frq);
 //	Serial.println("Start Move");
+//	Serial.println("Step : " + String(step, DEC) );
 //	Serial.println("Min Delay : " + String(this->minDelay, DEC) );
 //	Serial.println("stepToSpeed : " + String(this->stepToSpeed, DEC) );
 //	Serial.println("stepToStop : " + String(this->stepToStop, DEC) );
@@ -120,6 +145,7 @@ uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t de
 	++this->n;
 	this->cn = this->calCn(this->n);
 //	Serial.println("Cn : " + String(this->cn, DEC) );
+	this->isRunning = true;
 	TimerStart();
 
 	return this->currentStep;
@@ -137,7 +163,9 @@ uint8_t StepMotor::Run(void) {
 	switch (this->state) {
 	case STOP:
 		// Do nothing
-		//Serial.println("Stop");
+//		Serial.println("Stop " + String(this->currentStep, DEC));
+		this->isRunning = false;
+
 		TimerStop();
 		break;
 	case ACC:
@@ -182,11 +210,11 @@ uint8_t StepMotor::Run(void) {
 //	frq = (uint32_t) (this->cn / this->fref);
 //	timer->UpdateFrequency(frq);
 	//UpdateTimer((uint16_t)this->cn);
-	if (this->dir) {
-		this->currentStep--;
+	if (this->dir == DIR_CW) {
+		this->currentStep++;
 	}
 	else {
-		this->currentStep++;
+		this->currentStep--;
 	}
 
 	return 1;
@@ -284,14 +312,14 @@ void UpdateTimer(uint16_t value) {
 #ifndef MOTION_IMPLEMENT_ISR
 ISR (TIMER1_OVF_vect) {
 	//PORTD ^= 1 << 6;
-	PORTD ^= 1 << 7;
+	//PORTD ^= 1 << 7;
 	//MOTOR::MotorControl::Callback (&motionControl);
 	stepMotor.Run();
 
 }
 
 ISR (TIMER1_COMPB_vect) {
-	PORTD ^= 1 << 6;
+	PORTD ^= 1 << 5;
 	//MotorControl::CallBack(&motionControl);
 }
 #endif

@@ -52,7 +52,7 @@ public:
 	} MotorState_t;
 
 	typedef enum {
-		DIR_CW,
+		DIR_CW = 0,
 		DIR_CCW
 	} MotorDir_t;
 
@@ -70,14 +70,17 @@ public:
 	virtual ~StepMotor();
 
 	uint8_t Init(uint8_t dirPin, MotorDirLogic_t dirType);
+	uint8_t SetDirPin(uint8_t dirPin);
+	uint8_t SetDirLogic(MotorDirLogic_t dirType);
 	uint32_t MoveAbs(uint32_t absolute);
 	uint32_t MoveInc(uint32_t relative);
 	uint32_t Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t dec);
 	uint32_t Move(int32_t step);
 	uint8_t Run(void);
+	uint8_t IsMoving() {return this->isRunning;};
 
 	uint32_t GetCurrentPosition() {return this->currentStep;};
-
+	uint8_t GetCurrentDir() {return (uint8_t)this->dir;};
 private:
 	uint32_t calMinDelay(void);
 	uint32_t calC0(void);
