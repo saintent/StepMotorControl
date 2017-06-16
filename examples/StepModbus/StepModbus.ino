@@ -49,7 +49,8 @@ const int REG_ACC = 5;
 const int REG_DEC = 6;
 const int REG_BUSY = 7;
 
-const int DIR_PIN = 6
+const int DIR_PIN = 6;
+ModbusSerial mb;
 
 void setup() {
   // put your setup code here, to run once:
@@ -79,14 +80,14 @@ void loop() {
   // put your main code here, to run repeatedly:
   mb.task();
   // Map current step
-  mb.Hreg(REG_CURR_STEP, stepMotor.GetCurrentPosition())
+  mb.Hreg(REG_CURR_STEP, stepMotor.GetCurrentPosition());
   // Map current DIR
-  mb.Hreg(REG_CURR_DIR, stepMotor.GetCurrentDir())
+  mb.Hreg(REG_CURR_DIR, stepMotor.GetCurrentDir());
   // Map BUSY flag
-  mb.Hreg(REG_BUSY, stepMotor.Ismoving())
+  mb.Hreg(REG_BUSY, stepMotor.IsMoving());
 
   // Setting attributte from modbus register
-  if (stepMotor.Ismoving() == FALSE) {
+  if (stepMotor.IsMoving() == false) {
     // Map speed
     if (stepMotor.GetSpeed() != mb.Hreg(REG_SPEED)) {
         stepMotor.Setspeed(mb.Hreg(REG_SPEED));
