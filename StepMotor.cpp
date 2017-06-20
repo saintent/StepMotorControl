@@ -20,6 +20,7 @@
 void TimerStart();
 void TimerStop();
 void UpdateTimer(uint16_t value);
+
 // ---------- PRIVATE DATA ---------------------------------------------------------------------- //
 #ifndef MOTION_IMPLEMENT_ISR
 Motor::StepMotor stepMotor;
@@ -124,22 +125,37 @@ uint32_t StepMotor::Move(int32_t step) {
 	//this->cn = this->calCn(this->n);
 	this->stepToSpeed = this->calStepToSpeed();
 	this->stepToStop = this->calStepToStop();
+	uint32_t acc_lim = this->calAccLimit(distance);
+	int32_t dec_val = 0;
 	this->stepToDec = distance - this->stepToStop;
+	if (acc_lim <=  this->stepToSpeed){
+		dec_val = acc_lim - distance;
+		this->stepToStop = (uint32_t)(-dec_val);
+		this->stepToDec = acc_lim;
+	}
+	else {
+		dec_val = -this->calStepToStop();
+	}
+
+	//Serial.println("Start Move");
+	//	Serial.println("Step : " + String(step, DEC) );
+//		Serial.println("Min Delay : " + String(this->minDelay, DEC) );
+//		Serial.println("stepToSpeed : " + String(this->stepToSpeed, DEC) );
+//		Serial.println("stepToStop : " + String(this->stepToStop, DEC) );
+//		Serial.println("stepToDec : " + String(this->stepToDec, DEC) );
+//		Serial.println("acc_lim : " + String(acc_lim, DEC) );
+//		Serial.println("dec_val : " + String(dec_val, DEC) );
 	if (this->stepToDec < 0) {
 		// error
 		// cann't perform
-//		Serial.println("can't Move");
+		//Serial.println("can't Move");
 		return 0;
 	}
 
 	// Change state
 	this->state = StepMotor::ACC;
-//	Serial.println("Start Move");
-//	Serial.println("Step : " + String(step, DEC) );
-//	Serial.println("Min Delay : " + String(this->minDelay, DEC) );
-//	Serial.println("stepToSpeed : " + String(this->stepToSpeed, DEC) );
-//	Serial.println("stepToStop : " + String(this->stepToStop, DEC) );
-//	Serial.println("stepToDec : " + String(this->stepToDec, DEC) );
+	this->rest = 0;
+	this->accelCount = 0;
 //	Serial.println("C0 : " + String(this->c0, DEC) );
 	UpdateTimer((uint16_t)this->c0);
 	// Calculate next cn
@@ -162,7 +178,7 @@ uint8_t StepMotor::Stop() {
 uint8_t StepMotor::Run(void) {
 	uint32_t frq;
 	int32_t _n;
-	Serial.println(String(this->n, DEC) +" : " + String(this->cn, DEC) );
+	//Serial.println(String(this->n, DEC) +" : " + String(this->cn, DEC) );
 	//	timer->UpdateFrequency(frq);
 	UpdateTimer((uint16_t)this->cn);
 
@@ -177,9 +193,12 @@ uint8_t StepMotor::Run(void) {
 		break;
 	case ACC:
 		_n = ++this->n;
+		this->accelCount++;
 		this->cn = this->calCn(_n);
 		if (_n >= this->stepToDec) {
 			this->state = DECCEL;
+			this->n = -this->stepToStop;
+			this->accelCount = this->stepToStop;
 		}
 		else if (_n >= this->stepToSpeed) {
 			if (this->move == MOVE_SPIN) {
@@ -197,10 +216,12 @@ uint8_t StepMotor::Run(void) {
 		if (_n >= this->stepToDec) {
 			this->state = DECCEL;
 			this->n = -this->stepToStop;
+			this->accelCount = this->stepToStop;
 		}
 		break;
 	case DECCEL:
 		_n = ++this->n;
+		this->accelCount++;
 		this->cn = this->calCn(_n);
 
 		if (--this->stepToStop <= 0) {
@@ -263,7 +284,9 @@ uint32_t StepMotor::calCn(int32_t n) {
 	float cnf;
 	float x,y;
 	x = ((4 * n) + 1);
-	y = (2 * this->cn);
+	y = (2 * this->cn + this->rest);
+	this->rest = ((2 * (long) this->cn) + this->rest)
+			% (4 * this->accelCount + 1);
 	//Serial.println("cnf x: " + String(x, DEC) );
 	//Serial.println("cnf y: " + String(y, DEC) );
 	//Serial.println("cnf y/x: " + String(-(y/x), DEC) );

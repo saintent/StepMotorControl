@@ -111,6 +111,8 @@ private:
 	int32_t			stepToDec;
 	uint32_t 		stepToStop;
 	uint32_t		fref;
+	int32_t 		rest;
+	int32_t			accelCount;
 };
 
 } /* namespace Motor */
