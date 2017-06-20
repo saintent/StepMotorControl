@@ -57,10 +57,12 @@ uint8_t StepMotor::Init(uint8_t dirPin, MotorDirLogic_t dirType) {
 	this->dirPin = dirPin;
 	this->dirState = dirType;
 	this->isRunning = false;
+	pinMode(5, OUTPUT);
 }
 
 uint8_t StepMotor::SetDirPin(uint8_t  dirPin) {
 	this->dirPin = dirPin;
+	pinMode(dirPin, OUTPUT);
 	return this->dirPin;
 }
 
