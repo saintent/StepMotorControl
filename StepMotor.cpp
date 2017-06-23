@@ -81,7 +81,7 @@ uint32_t StepMotor::MoveAbs(uint32_t absolute) {
 
 uint32_t StepMotor::MoveInc(uint32_t relative) {
 
-	return (this->Move(this->currentStep + relative));
+	return (this->Move(relative));
 }
 
 uint32_t StepMotor::Move(int32_t step, uint32_t speed, uint32_t acc, uint32_t dec) {
@@ -252,6 +252,7 @@ uint8_t StepMotor::Run(void) {
 uint32_t StepMotor::SetCurrentPosition(uint32_t value) {
 	this->Stop();
 	this->currentStep = value;
+	this->targetStep = value;
 }
 
 //=========== Private Method ======================================================================//
