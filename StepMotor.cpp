@@ -172,6 +172,7 @@ uint32_t StepMotor::Move(int32_t step) {
 uint8_t StepMotor::Stop() {
 	this->state = STOP;
 	this->isRunning = false;
+	this->targetStep = this->currentStep;
 	TimerStop();
 }
 
